@@ -1,0 +1,128 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><title>Alur Sertifikasi Kompetensi LSP</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#eef2f7;--fg:#0b2545;--bar:#d6e0ec;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0a0f1a;--fg:#e6edf5;--bar:#1b2738}}
+:root[data-theme=dark]{--bg:#0a0f1a;--fg:#e6edf5;--bar:#1b2738}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px system-ui,sans-serif;display:flex;justify-content:center}
+#w{width:100%;max-width:1100px;padding:12px;box-sizing:border-box;background:var(--bg)}
+canvas{width:100%;height:auto;aspect-ratio:16/9;border-radius:12px;display:block;background:#0b2545}
+.b{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+button,select{background:var(--bar);color:var(--fg);border:0;border-radius:8px;padding:8px 14px;font:inherit;cursor:pointer}
+input[type=range]{flex:1;min-width:140px}
+#vr{flex:0 1 100px;min-width:80px}
+label{display:flex;gap:6px;align-items:center}
+#pn{margin-top:12px;font-size:14px}
+#pn table{width:100%;border-collapse:collapse}
+#pn td{padding:4px 6px;border-bottom:1px solid var(--bar);vertical-align:middle}
+#pn input[type=text]{width:100%;box-sizing:border-box;background:var(--bar);color:var(--fg);border:0;border-radius:6px;padding:6px;font:inherit}
+#pn input[type=number]{width:64px;background:var(--bar);color:var(--fg);border:0;border-radius:6px;padding:6px;font:inherit}
+#pn small{opacity:.7}
+
+/* Mode embed: tampilkan hanya motion graphic */
+body.embed{display:block;overflow:hidden}
+body.embed #w{width:100%;max-width:none;padding:0}
+body.embed .b,
+body.embed #pn{display:none!important}
+body.embed canvas{border-radius:0}
+</style></head><body><div id="w">
+<canvas id="c"></canvas>
+<div class="b"><button id="pp">Jeda</button><button id="rs">Ulang</button><input id="s" type="range" min="0" max="1000" value="0"><span id="tm">0:00</span>
+<select id="d"><option value="60">60 detik</option><option value="40">40 detik</option></select>
+<label><input id="v" type="checkbox">Suara</label>
+<label>Kecepatan narasi <input id="vr" type="range" min="0.6" max="1.6" step="0.1" value="1"><span id="vrv">1.0×</span></label>
+<button id="fs">Layar penuh</button></div><div id="pn"><div class="b"><label>Audio narasi <input id="af" type="file" accept="audio/*"></label><button id="fit">Samakan total dengan audio</button><button id="rc">Rekam penanda scene</button><button id="nx" hidden>Scene berikutnya (N)</button></div><p id="rm" style="min-height:1.4em"></p><table id="tb"></table><p id="tt"></p></div><audio id="au"></audio></div>
+<script>
+if(new URLSearchParams(location.search).get('embed')==='1')document.body.classList.add('embed');
+
+const C=document.getElementById('c'),x=C.getContext('2d'),W=1280,H=720;C.width=W;C.height=H;
+const cl=(v,a=0,b=1)=>Math.min(b,Math.max(a,v)),pr=(t,a,b)=>cl((t-a)/(b-a)),eo=v=>1-(1-v)**3,eb=v=>1+2.70158*(v-1)**3+1.70158*(v-1)**2,lp=(a,b,v)=>a+(b-a)*v;
+const NV='#0b2545',TL='#13c4a3',YL='#ffc857',RD='#ff6b6b',BL='#4ea1ff';
+function tx(s,X,Y,z,c='#fff',al='center',w=700){x.font=`${w} ${z}px system-ui,sans-serif`;x.fillStyle=c;x.textAlign=al;x.textBaseline='middle';s.split('\n').forEach((l,i,a)=>x.fillText(l,X,Y+(i-(a.length-1)/2)*z*1.2))}
+function rr(X,Y,w,h,r,f){x.beginPath();x.roundRect(X,Y,w,h,r);if(f){x.fillStyle=f;x.fill()}}
+function G(X,Y,s,a,f){x.save();x.globalAlpha*=a;x.translate(X,Y);x.scale(s,s);f();x.restore()}
+function doc(X,Y,l,p=1,o={}){if(p<=0)return;G(X,Y,eb(cl(p))*(o.s||1),cl(p*3),()=>{x.shadowColor='#0007';x.shadowBlur=14;rr(-66,-42,132,84,8,'#fff');x.shadowBlur=0;x.fillStyle=o.c||TL;x.fillRect(-52,-31,104,5);x.fillStyle='#cbd5e1';x.fillRect(-52,-21,70,3);tx(l,0,10,Math.max(...l.split('\n').map(s=>s.length))>15?11.5:13,NV);if(o.n){x.beginPath();x.arc(58,-38,15,0,7);x.fillStyle=YL;x.fill();tx(o.n,58,-38,14,NV)}})}
+function pe(X,Y,c,l,s=1,a=1){G(X,Y,s,a,()=>{x.fillStyle=c;x.beginPath();x.arc(0,-36,20,0,7);x.fill();x.beginPath();x.moveTo(-34,38);x.quadraticCurveTo(-34,-6,0,-6);x.quadraticCurveTo(34,-6,34,38);x.fill();tx(l,0,62,18)})}
+function bd(X,Y,c,l,s=1,a=1){G(X,Y,s,a,()=>{x.fillStyle=c;x.beginPath();x.moveTo(-62,-18);x.lineTo(0,-62);x.lineTo(62,-18);x.fill();x.fillRect(-52,-12,104,58);x.fillStyle='#ffffff66';[-38,-14,14,38].forEach(v=>x.fillRect(v-5,-4,10,26));x.fillStyle=NV;x.fillRect(-9,22,18,24);tx(l,0,68,18)})}
+function ck(X,Y,p,r=24){if(p<=0)return;G(X,Y,eb(cl(p)),1,()=>{x.beginPath();x.arc(0,0,r,0,7);x.fillStyle='#22c55e';x.fill();x.strokeStyle='#fff';x.lineWidth=r/5;x.lineCap='round';x.beginPath();x.moveTo(-r*.4,0);x.lineTo(-r*.1,r*.3);x.lineTo(r*.45,-r*.3);x.stroke()})}
+function st(X,Y,s,p,c=RD){if(p<=0)return;G(X,Y,lp(2.2,1,eo(p)),cl(p*2),()=>{x.rotate(-.2);x.font='800 30px system-ui';const w=x.measureText(s).width+36;x.strokeStyle=c;x.lineWidth=5;rr(-w/2,-26,w,52,8);x.stroke();tx(s,0,0,30,c,'center',800)})}
+function ce(X,Y,s,a=1){G(X,Y,s,a,()=>{rr(-110,-76,220,152,8,'#fffbeb');x.strokeStyle='#d4a017';x.lineWidth=4;rr(-102,-68,204,136,4);x.stroke();tx('SERTIFIKAT',0,-40,20,'#8a6a00','center',800);tx('KOMPETENSI',0,-20,14,'#8a6a00');x.fillStyle='#d9c58a';x.fillRect(-70,2,140,4);x.fillRect(-50,14,100,4);x.beginPath();x.arc(0,46,16,0,7);x.fillStyle='#d4a017';x.fill()})}
+function bu(X,Y,l,p){if(p<=0)return;G(X,Y,eb(cl(p)),1,()=>{rr(-95,-28,190,56,14,'#fff');tx(l,0,0,17,NV)})}
+function mg(X,Y,a){if(a<=0)return;G(X,Y,1,a,()=>{x.strokeStyle=YL;x.lineWidth=7;x.lineCap='round';x.beginPath();x.arc(0,0,22,0,7);x.moveTo(16,16);x.lineTo(40,40);x.stroke()})}
+function cal(X,Y,s,top,big,p=1){if(p<=0)return;G(X,Y,s*eb(cl(p)),cl(p*3),()=>{rr(-90,-60,180,120,14,'#fff');x.fillStyle=RD;x.beginPath();x.roundRect(-90,-60,180,34,[14,14,0,0]);x.fill();tx(top,0,-43,16,'#fff','center',800);tx(big,0,17,44,NV,'center',800)})}
+function sv(X,Y,l,p=1){G(X,Y,1,p,()=>{[0,1,2].forEach(i=>{rr(-50,-52+i*34,100,28,6,'#334e7a');x.fillStyle=TL;x.beginPath();x.arc(-32,-38+i*34,5,0,7);x.fill();x.fillStyle='#ffffff55';x.fillRect(-18,-40+i*34,56,4)});tx(l,0,76,18)})}
+const fd=(p,a,b)=>p*(1-pr(0,0,1));
+const TK=['Surat Permohonan\nPeminjaman TUK','Surat Balasan\nPeminjaman TUK','Surat Permohonan\nVerifikasi TUK','Berita Acara\nVerifikasi TUK','SK Penetapan\nVerifikasi TUK'];
+const SC=[
+[0,4,u=>{tx('Alur Sertifikasi Kompetensi',640,240,54,'#fff','center',800);tx('Lembaga Sertifikasi Profesi (LSP)',640,305,26,TL);const p=eo(pr(u,.6,3.2));x.strokeStyle=YL;x.lineWidth=6;x.lineCap='round';x.setLineDash([2,14]);x.beginPath();x.moveTo(240,470);x.lineTo(lp(240,940,p),470);x.stroke();x.setLineDash([]);pe(lp(240,940,p),435,BL,'');ce(1060,440,1,.35)}],
+[4,11,u=>{pe(lp(-100,230,eo(pr(u,0,.8))),380,BL,u>5?'Peserta':'Mahasiswa');const m=eo(pr(u,2,3.4));
+[['APL-01\nPermohonan',280],['APL-02\nAsesmen Mandiri',385],['Bukti\nrelevan',490]].forEach(([l,y],i)=>{const s=.5+i*.35;doc(lp(480,800,m),lp(y,385,m),l,pr(u,s,s+.4)*(1-pr(u,3.3,3.8)))});
+pe(960,380,TL,'Admin LSP');mg(960+Math.sin(u*4)*18,310,pr(u,3.4,3.7)*(1-pr(u,4.6,4.9)));ck(960,300,pr(u,4.7,5.2));
+G(0,0,1,pr(u,5.2,5.8),()=>tx('Memenuhi persyaratan, resmi jadi peserta',640,540,24,YL))}],
+[11,17,u=>{bd(190,390,TL,'LSP');pe(1030,390,YL,'Asesor');
+[['SK Pelaksanaan\nUji Kompetensi','39',320,.5],['Surat Tugas\nAsesmen','38',470,2.7]].forEach(([l,n,y,s],i)=>{const q=eo(pr(u,s,s+1.6));doc(lp(190,760,q),lp(390,y,q),l,pr(u,s,s+.3),{n});G(0,0,1,pr(u,s+1.6,s+2),()=>tx(String(i+1),630,y,40,YL,'center',800))});ck(1030,300,pr(u,5,5.5))}],
+[17,26,u=>{x.strokeStyle='#ffffff30';x.lineWidth=2;x.beginPath();x.moveTo(430,170);x.lineTo(430,560);x.stroke();
+pe(130,310,YL,'Asesor');doc(320,310,'Perangkat\nSkema',pr(u,.3,.9));ck(320,240,pr(u,2.5,3));G(0,0,1,pr(u,.4,1),()=>tx('Verifikasi\nperangkat skema',225,440,20));
+pe(520,290,TL,'Manajer Adm.');bd(1150,290,BL,'TUK');G(0,0,1,pr(u,.4,1),()=>tx('Verifikasi TUK oleh Manajer Administrasi',830,185,20,YL));
+TK.forEach((l,i)=>{const s=1+i*1.1,X=560+i*150;doc(X,470,l,pr(u,s,s+.5),{n:String(i+1)});ck(X+58,512,pr(u,s+.7,s+1.1),15)});st(840,320,'TERVERIFIKASI',pr(u,6.8,7.4),'#22c55e')}],
+[26,32,u=>{cal(640,230,1.2,'SEBELUM UJIAN','H-1',pr(u,0,.7));pe(330,450,YL,'Asesor');pe(950,450,BL,'Asesi');bu(450,365,'Prosedur ujian',pr(u,1.5,2));bu(840,365,'Persiapan ujian',pr(u,3,3.5));ck(950,370,pr(u,4.5,5),18)}],
+[32,38,u=>{cal(190,215,.9,'HARI UJIAN','H-0',pr(u,0,.6));pe(380,360,BL,'Asesi');pe(600,360,YL,'Asesor');rr(300,396,400,18,6,'#5b7088');
+G(0,0,1,pr(u,.8,1.4),()=>tx('Uji kompetensi berlangsung',640,215,26,'#fff'));bd(1080,400,TL,'LSP');
+['Rekomendasi\nHasil','Berita Acara','Daftar Hadir'].forEach((l,i)=>{const s=2.6+i*.6,q=eo(pr(u,s,s+1.3));doc(lp(620,1080,q),lp(250+i*40,400,q),l,pr(u,s,s+.3)*(1-pr(u,s+1.2,s+1.5)),{n:i==1?'43':0})});ck(1080,310,pr(u,5.2,5.7))}],
+[38,46,u=>{bd(130,400,TL,'LSP');x.fillStyle='#1e4976';x.beginPath();x.ellipse(520,410,120,50,0,0,7);x.fill();
+for(let i=0;i<5;i++){const a=(i*72-90)*Math.PI/180,q=eo(pr(u,.3+i*.2,1.3+i*.2)),bob=u>3&&u<5.5?Math.sin(u*9+i)*4:0;pe(lp(130,520+Math.cos(a)*165,q),lp(400,405+Math.sin(a)*88,q)+bob,[BL,YL,RD,'#a78bfa',TL][i],'',.55)}
+G(0,0,1,pr(u,1.2,1.8),()=>tx('Tim Teknis Pengambil Keputusan',520,215,24));bu(520,410,'Rapat Pleno',pr(u,3,3.5)*(1-pr(u,5.3,5.6)));
+doc(950,250,'SK Tim\nTeknis',pr(u,1.5,2),{n:'42'});doc(950,385,'Berita Acara\nRapat Pleno',pr(u,3.2,3.8),{n:'43'});doc(950,520,'Hasil Uji\nKompetensi',pr(u,5.5,6));st(950,520,'DITETAPKAN',pr(u,6.3,6.8),'#22c55e')}],
+[46,56,u=>{G(0,0,1,1-pr(u,3.8,4.3),()=>{pe(250,390,BL,'Asesi');doc(640,380,'Surat Pernyataan\nPemegang Sertifikat',pr(u,.4,1),{s:1.7});
+x.strokeStyle='#1d4ed8';x.lineWidth=3;x.setLineDash([pr(u,1.5,3.3)*300,400]);x.beginPath();x.moveTo(580,432);x.bezierCurveTo(600,404,612,464,632,428);x.bezierCurveTo(652,404,662,454,710,424);x.stroke();x.setLineDash([]);ck(770,320,pr(u,3.4,3.8))});
+const a2=pr(u,4.2,4.8);bd(240,480,TL,'LSP',1,a2);sv(640,250,'SISFO',a2);bd(1040,480,BL,'BNSP',1,a2);
+G(0,0,1,pr(u,5,5.5),()=>tx('Kirim hasil',430,340,20,YL));const q1=eo(pr(u,5,6.5));doc(lp(240,640,q1),lp(480,250,q1),'',pr(u,5,5.3)*(1-pr(u,6.3,6.6)),{s:.45});ck(720,200,pr(u,6.6,7),18);
+G(0,0,1,pr(u,6.8,7.3),()=>tx('BNSP kirim kertas sertifikat',700,545,20,YL));const q2=eo(pr(u,6.8,8.4));doc(lp(1040,240,q2),480,'Kertas\nSertifikat',pr(u,6.8,7.1)*(1-pr(u,8.3,8.5)),{s:.8,c:YL});
+const q3=eo(pr(u,8.4,9.6));ce(240,lp(420,290,q3),1,q3);G(0,0,1,pr(u,9,9.6),()=>tx('LSP cetak sertifikat (draft No. 26)',240,170,18,YL))}],
+[56,60,u=>{ce(640,300,2.2,pr(u,0,.6));G(0,0,1,pr(u,.6,1.2),()=>{rr(500,478,280,56,28,YL);tx('KOMPETEN',640,506,34,NV,'center',800)});
+for(let i=0;i<40;i++){const X=(i*97)%1280,Y=((i*53)%300+u*140*(1+i%3*.3))%720;G(X,Y,1,pr(u,.3,.8),()=>{x.rotate(u*3+i);x.fillStyle=[YL,TL,RD,BL][i%4];x.fillRect(-5,-3,10,6)})}}]];
+const CP=['Dari daftar hingga sertifikat: inilah alur uji kompetensi di LSP.','Mahasiswa mengisi APL-01 dan APL-02 beserta bukti relevan. Admin LSP menelaah, dan jika memenuhi syarat, resmi jadi peserta.','LSP menyiapkan SK Pelaksanaan Uji Kompetensi, lalu Surat Tugas Asesmen untuk asesor.','Asesor memverifikasi perangkat skema. Manajer administrasi LSP memverifikasi Tempat Uji Kompetensi, dari surat peminjaman hingga SK penetapan TUK.','Sebelum hari ujian, asesor bertemu asesi untuk menjelaskan prosedur dan persiapan ujian.','Saatnya ujian! Asesor menyampaikan rekomendasi hasil, berita acara, dan daftar hadir ke LSP.','LSP membentuk tim teknis pengambil keputusan. Rapat pleno digelar, dibuat berita acara, lalu hasil uji kompetensi ditetapkan.','Asesi mengisi surat pernyataan pemegang sertifikat. LSP mengirim hasil ke SISFO, BNSP mengirim kertas sertifikat, dan LSP mencetaknya.','Kompeten. Tersertifikasi. Siap berkarier.'];
+const NM=['Isi APL-01 & APL-02','Telaah Admin LSP','SK & Surat Tugas','Verifikasi Skema & TUK','Pra-Asesmen','Uji Kompetensi','Rekomendasi ke LSP','Bentuk Tim Teknis','Rapat Pleno','Penetapan Hasil','Surat Pernyataan','SISFO, BNSP & Cetak'];
+const stT=[4,7.5,11,17,26,32,35,38,41,44,46,50],P=i=>100+i*1080/11;
+const BG=document.createElement('canvas');BG.width=W;BG.height=H;{const b=BG.getContext('2d'),g=b.createLinearGradient(0,0,W,H);g.addColorStop(0,'#0b2545');g.addColorStop(1,'#13315c');b.fillStyle=g;b.fillRect(0,0,W,H);b.fillStyle='#ffffff10';for(let i=0;i<W;i+=40)for(let j=0;j<H;j+=40)b.fillRect(i,j,2,2)}
+function wr(s){x.font='500 24px system-ui';const L=[];let c='';s.split(' ').forEach(w=>{if(c&&x.measureText(c+' '+w).width>1080){L.push(c);c=w}else c=c?c+' '+w:w});L.push(c);return L.join('\n')}
+function render(t){x.clearRect(0,0,W,H);x.drawImage(BG,0,0);let ci=0;
+SC.forEach(([a,b,f],k)=>{if(t>=a&&t<b){ci=k;const u=t-a,d=b-a,fo=b>=60?1:1-pr(u,d-.4,d);x.save();x.globalAlpha=Math.min(pr(u,0,.4),fo);f(u);x.restore()}});
+let si=-1;stT.forEach((s,i)=>{if(t>=s)si=i});
+if(si>=0){const k=eo(pr(t-stT[si],0,.5));G(lp(-30,0,k),0,1,k,()=>{rr(48,52,160,36,18,YL);tx(`LANGKAH ${si+1}/12`,128,70,16,NV,'center',800);tx(NM[si],226,70,30,'#fff','left')})}
+const ph=t<26?0:t<38?1:2;let px=1232;['Penetapan & Sertifikat','Pelaksanaan','Persiapan'].forEach((n,j)=>{const i=2-j;x.font='600 16px system-ui';const w=x.measureText(n).width+32;px-=w;rr(px,54,w,32,16,i==ph?TL:'#ffffff1f');tx(n,px+w/2,70,16,i==ph?NV:'#9fb3c8');px-=10});
+rr(70,586,1140,70,16,'#00000070');tx(wr(CP[ci]),640,621,24,'#fff','center',500);
+let mk=P(0);if(si>=0&&si<11)mk=lp(P(si),P(si+1),pr(t,stT[si],stT[si+1]));else if(si==11)mk=P(11);
+x.lineCap='round';x.lineWidth=5;x.strokeStyle='#ffffff30';x.beginPath();x.moveTo(P(0),688);x.lineTo(P(11),688);x.stroke();x.strokeStyle=YL;x.beginPath();x.moveTo(P(0),688);x.lineTo(mk,688);x.stroke();
+for(let i=0;i<12;i++){x.beginPath();x.arc(P(i),688,7,0,7);x.fillStyle=t>=stT[i]?YL:'#ffffff40';x.fill();tx(String(i+1),P(i),708,11,'#ffffff90')}
+x.beginPath();x.arc(mk,688,11,0,7);x.fillStyle='#fff';x.fill();x.lineWidth=4;x.strokeStyle=YL;x.stroke();return ci}
+let D=60,pos=0,play=true,last=performance.now(),lastC=-1;const $=id=>document.getElementById(id);
+const OR=SC.map(([a,b])=>b-a),au=$('au');let DUR=[6,12,7,11,7,9,10,11,4],rec=null;
+try{const s=JSON.parse(localStorage.getItem('lsp')||'null');if(s&&s.c&&s.c.length==CP.length)s.c.forEach((v,i)=>CP[i]=v)}catch(e){}
+const SN=['Intro','1-2 Pendaftaran','3 SK & Surat Tugas','4 Verifikasi skema & TUK','5 Pra-asesmen','6-7 Ujian','8-10 Tim teknis','11-12 Sertifikat','Penutup'];
+const S0=()=>{let a=0;return DUR.map(d=>(a+=d)-d)};
+function recalc(){D=DUR.reduce((p,c)=>p+c,0);$('tt').textContent='Total durasi: '+D.toFixed(1)+' detik';const q=S0();document.querySelectorAll('.du').forEach((e,i)=>{if(document.activeElement!==e)e.value=DUR[i].toFixed(1)});document.querySelectorAll('.mu').forEach((e,i)=>e.textContent='mulai '+q[i].toFixed(1)+'s');$('d').value=(Math.abs(D-60)<.05||Math.abs(D-40)<.05)&&DUR.every((d,i)=>Math.abs(d-OR[i]*D/60)<.05)?String(Math.round(D)):''}
+function saveS(){try{localStorage.setItem('lsp',JSON.stringify({d:DUR,c:CP}))}catch(e){}}
+function toV(p){const q=S0();let k=DUR.length-1;for(let i=0;i<DUR.length;i++)if(p<q[i]+DUR[i]){k=i;break}return Math.min(SC[k][0]+(p-q[k])*OR[k]/DUR[k],SC[k][1]-.001)}
+function syncAu(){if(!au.src)return;if(play&&pos<(au.duration||0)){if(au.paused)au.play().catch(()=>{});if(Math.abs(au.currentTime-pos)>.35)au.currentTime=pos}else if(!au.paused)au.pause()}
+function loop(n){const dt=Math.min((n-last)/1000,.1);last=n;if(play){pos+=dt;if(pos>=D&&!rec){pos=D;play=false}}
+const c=render(toV(pos));
+if(play&&c!==lastC&&$('v').checked&&!au.src&&window.speechSynthesis){speechSynthesis.cancel();const m=new SpeechSynthesisUtterance(CP[c]);m.lang='id-ID';m.rate=Number($('vr').value);speechSynthesis.speak(m)}lastC=c;syncAu();
+$('s').value=pos/D*1000;$('tm').textContent=`${Math.floor(pos/60)}:${String(Math.floor(pos%60)).padStart(2,'0')} / ${D}s`;$('pp').textContent=play?'Jeda':'Putar';requestAnimationFrame(loop)}
+$('pp').onclick=()=>{if(pos>=D)pos=0;play=!play};$('rs').onclick=()=>{pos=0;play=true;lastC=-1};
+$('s').oninput=e=>{pos=e.target.value/1000*D;lastC=-1};
+$('d').onchange=e=>{if(!e.target.value)return;const r=pos/D;DUR=OR.map(o=>o*e.target.value/60);recalc();saveS();pos=r*D};
+$('v').onchange=e=>{if(!e.target.checked&&window.speechSynthesis)speechSynthesis.cancel();lastC=-1};
+$('vr').oninput=e=>{$('vrv').textContent=Number(e.target.value).toFixed(1)+'×'};
+$('fs').onclick=()=>{try{$('w').requestFullscreen()}catch(e){}};
+const nm=()=>`Tekan "Scene berikutnya" (atau tombol N) saat narasi ini mulai: ${SN[rec.length]} - "${CP[rec.length]}"`;
+function nextMark(){if(!rec)return;rec.push(pos);if(rec.length>=SC.length){const m=rec.concat(Math.max(au.duration||D,pos+2));DUR=m.slice(1).map((v,i)=>Math.max(1,v-m[i]));rec=null;$('nx').hidden=true;recalc();saveS();$('rm').textContent='Selesai. Durasi scene sudah disesuaikan dengan audio. Putar ulang untuk mengecek.';pos=0;play=true;lastC=-1}else $('rm').textContent=nm()}
+$('rc').onclick=()=>{if(!au.src){$('rm').textContent='Muat file audio dulu.';return}rec=[0];pos=0;play=true;au.currentTime=0;lastC=-1;$('nx').hidden=false;$('rm').textContent=nm()};
+$('nx').onclick=nextMark;addEventListener('keydown',e=>{if(rec&&(e.key=='n'||e.key=='N'))nextMark()});
+au.onended=()=>{if(rec){rec=null;$('nx').hidden=true;$('rm').textContent='Perekaman dibatalkan: audio selesai sebelum semua scene ditandai.'}};
+$('af').onchange=e=>{const f=e.target.files[0];if(!f)return;if(window.speechSynthesis)speechSynthesis.cancel();au.src=URL.createObjectURL(f);au.onloadedmetadata=()=>{$('rm').textContent='Audio dimuat ('+au.duration.toFixed(1)+' detik). Suara bawaan dimatikan. Atur durasi tiap scene di tabel, atau klik Rekam penanda scene.';pos=0;play=true;lastC=-1;au.play().catch(()=>{})}};
+$('fit').onclick=()=>{if(au.duration){const f=au.duration/D;DUR=DUR.map(d=>d*f);recalc();saveS()}};
+SC.forEach((s,i)=>{const r=$('tb').insertRow();r.innerHTML='<td><button class="jp">'+SN[i]+'</button></td><td><input class="du" type="number" min="1" step="0.1"> detik<br><small class="mu"></small></td><td><input class="ct" type="text"></td>';r.querySelector('.jp').onclick=()=>{pos=S0()[i];lastC=-1};r.querySelector('.du').oninput=e=>{const v=parseFloat(e.target.value);if(v>=1){DUR[i]=v;recalc();saveS()}};const ct=r.querySelector('.ct');ct.value=CP[i];ct.oninput=()=>{CP[i]=ct.value;saveS()}});recalc();
+requestAnimationFrame(loop);
+</script></body></html>
