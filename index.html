@@ -11,7 +11,7 @@ canvas{width:100%;height:auto;aspect-ratio:16/9;border-radius:12px;display:block
 .b{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
 button,select{background:var(--bar);color:var(--fg);border:0;border-radius:8px;padding:8px 14px;font:inherit;cursor:pointer}
 input[type=range]{flex:1;min-width:140px}
-#vr{flex:0 1 100px;min-width:80px}
+#vr{flex:0 1 100px;min-width:80px;cursor:not-allowed}
 label{display:flex;gap:6px;align-items:center}
 #pn{margin-top:12px;font-size:14px}
 #pn table{width:100%;border-collapse:collapse}
@@ -39,8 +39,8 @@ body.embed .sound-control{align-items:center}
 <input id="s" type="range" min="0" max="1000" value="0">
 <span id="tm">0:00</span>
 <select id="d"><option value="60">60 detik</option><option value="40">40 detik</option></select>
-<label class="sound-control"><input id="v" type="checkbox" checked>Suara</label>
-<label>Kecepatan narasi <input id="vr" type="range" min="0.6" max="1.6" step="0.1" value="1"><span id="vrv">1.0×</span></label>
+<label class="sound-control"><input id="v" type="checkbox">Suara</label>
+<label>Kecepatan narasi <input id="vr" type="range" min="1" max="1" step="0.1" value="1" disabled><span id="vrv">1.0×</span></label>
 <button id="fs">Layar penuh</button>
 </div>
 <div id="pn">
@@ -127,7 +127,7 @@ const S0=()=>{let a=0;return DUR.map(d=>(a+=d)-d)};
 function recalc(){D=DUR.reduce((p,c)=>p+c,0);$('tt').textContent='Total durasi: '+D.toFixed(1)+' detik';const q=S0();document.querySelectorAll('.du').forEach((e,i)=>{if(document.activeElement!==e)e.value=DUR[i].toFixed(1)});document.querySelectorAll('.mu').forEach((e,i)=>e.textContent='mulai '+q[i].toFixed(1)+'s');$('d').value=(Math.abs(D-60)<.05||Math.abs(D-40)<.05)&&DUR.every((d,i)=>Math.abs(d-OR[i]*D/60)<.05)?String(Math.round(D)):''}
 function saveS(){try{localStorage.setItem('lsp',JSON.stringify({d:DUR,c:CP}))}catch(e){}}
 function toV(p){const q=S0();let k=DUR.length-1;for(let i=0;i<DUR.length;i++)if(p<q[i]+DUR[i]){k=i;break}return Math.min(SC[k][0]+(p-q[k])*OR[k]/DUR[k],SC[k][1]-.001)}
-function speakScene(c){if(!window.speechSynthesis||!$('v').checked||au.src)return;speechSynthesis.cancel();const m=new SpeechSynthesisUtterance(CP[c]);m.lang='id-ID';m.rate=Number($('vr').value);speechSynthesis.speak(m)}
+function speakScene(c){if(!window.speechSynthesis||!$('v').checked||au.src)return;speechSynthesis.cancel();const m=new SpeechSynthesisUtterance(CP[c]);m.lang='id-ID';m.rate=1;speechSynthesis.speak(m)}
 function unlockVoice(){if(voiceReady||!$('v').checked||au.src||!window.speechSynthesis)return;voiceReady=true;const c=render(toV(pos));speakScene(c);lastC=c}
 document.addEventListener('pointerdown',unlockVoice);
 document.addEventListener('keydown',unlockVoice);
@@ -141,7 +141,7 @@ $('pp').onclick=()=>{if(pos>=D)pos=0;play=!play};$('rs').onclick=()=>{pos=0;play
 $('s').oninput=e=>{pos=e.target.value/1000*D;lastC=-1};
 $('d').onchange=e=>{if(!e.target.value)return;const r=pos/D;DUR=OR.map(o=>o*e.target.value/60);recalc();saveS();pos=r*D};
 $('v').onchange=e=>{if(!e.target.checked){if(window.speechSynthesis)speechSynthesis.cancel();voiceReady=false;lastC=-1}else unlockVoice()};
-$('vr').oninput=e=>{$('vrv').textContent=Number(e.target.value).toFixed(1)+'×'};
+$('vr').oninput=e=>{$('vrv').textContent='1.0×'};
 $('fs').onclick=()=>{try{$('w').requestFullscreen()}catch(e){}};
 const nm=()=>`Tekan "Scene berikutnya" (atau tombol N) saat narasi ini mulai: ${SN[rec.length]} - "${CP[rec.length]}"`;
 function nextMark(){if(!rec)return;rec.push(pos);if(rec.length>=SC.length){const m=rec.concat(Math.max(au.duration||D,pos+2));DUR=m.slice(1).map((v,i)=>Math.max(1,v-m[i]));rec=null;$('nx').hidden=true;recalc();saveS();$('rm').textContent='Selesai. Durasi scene sudah disesuaikan dengan audio. Putar ulang untuk mengecek.';pos=0;play=true;lastC=-1}else $('rm').textContent=nm()}
