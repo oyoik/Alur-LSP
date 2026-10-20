@@ -20,19 +20,42 @@ label{display:flex;gap:6px;align-items:center}
 #pn input[type=number]{width:64px;background:var(--bar);color:var(--fg);border:0;border-radius:6px;padding:6px;font:inherit}
 #pn small{opacity:.7}
 
-/* Mode embed: tampilkan hanya motion graphic */
+/* Mode embed: tampilkan motion graphic dan kontrol terpilih */
 body.embed{display:block;overflow:hidden}
 body.embed #w{width:100%;max-width:none;padding:0}
-body.embed .b,
 body.embed #pn{display:none!important}
 body.embed canvas{border-radius:0}
+body.embed .b{display:flex;justify-content:center;gap:10px;margin:0;padding:8px}
+body.embed .b>*{display:none!important}
+body.embed .b>#pp,
+body.embed .b>#rs,
+body.embed .b>.sound-control{display:flex!important}
+body.embed .sound-control{align-items:center}
 </style></head><body><div id="w">
 <canvas id="c"></canvas>
-<div class="b"><button id="pp">Jeda</button><button id="rs">Ulang</button><input id="s" type="range" min="0" max="1000" value="0"><span id="tm">0:00</span>
+<div class="b">
+<button id="pp">Jeda</button>
+<button id="rs">Ulang</button>
+<input id="s" type="range" min="0" max="1000" value="0">
+<span id="tm">0:00</span>
 <select id="d"><option value="60">60 detik</option><option value="40">40 detik</option></select>
-<label><input id="v" type="checkbox">Suara</label>
+<label class="sound-control"><input id="v" type="checkbox" checked>Suara</label>
 <label>Kecepatan narasi <input id="vr" type="range" min="0.6" max="1.6" step="0.1" value="1"><span id="vrv">1.0×</span></label>
-<button id="fs">Layar penuh</button></div><div id="pn"><div class="b"><label>Audio narasi <input id="af" type="file" accept="audio/*"></label><button id="fit">Samakan total dengan audio</button><button id="rc">Rekam penanda scene</button><button id="nx" hidden>Scene berikutnya (N)</button></div><p id="rm" style="min-height:1.4em"></p><table id="tb"></table><p id="tt"></p></div><audio id="au"></audio></div>
+<button id="fs">Layar penuh</button>
+</div>
+<div id="pn">
+<div class="b">
+<label>Audio narasi <input id="af" type="file" accept="audio/*"></label>
+<button id="fit">Samakan total dengan audio</button>
+<button id="rc">Rekam penanda scene</button>
+<button id="nx" hidden>Scene berikutnya (N)</button>
+</div>
+<p id="rm" style="min-height:1.4em"></p>
+<table id="tb"></table>
+<p id="tt"></p>
+</div>
+<audio id="au"></audio>
+</div>
 <script>
 if(new URLSearchParams(location.search).get('embed')==='1')document.body.classList.add('embed');
 
@@ -52,7 +75,6 @@ function bu(X,Y,l,p){if(p<=0)return;G(X,Y,eb(cl(p)),1,()=>{rr(-95,-28,190,56,14,
 function mg(X,Y,a){if(a<=0)return;G(X,Y,1,a,()=>{x.strokeStyle=YL;x.lineWidth=7;x.lineCap='round';x.beginPath();x.arc(0,0,22,0,7);x.moveTo(16,16);x.lineTo(40,40);x.stroke()})}
 function cal(X,Y,s,top,big,p=1){if(p<=0)return;G(X,Y,s*eb(cl(p)),cl(p*3),()=>{rr(-90,-60,180,120,14,'#fff');x.fillStyle=RD;x.beginPath();x.roundRect(-90,-60,180,34,[14,14,0,0]);x.fill();tx(top,0,-43,16,'#fff','center',800);tx(big,0,17,44,NV,'center',800)})}
 function sv(X,Y,l,p=1){G(X,Y,1,p,()=>{[0,1,2].forEach(i=>{rr(-50,-52+i*34,100,28,6,'#334e7a');x.fillStyle=TL;x.beginPath();x.arc(-32,-38+i*34,5,0,7);x.fill();x.fillStyle='#ffffff55';x.fillRect(-18,-40+i*34,56,4)});tx(l,0,76,18)})}
-const fd=(p,a,b)=>p*(1-pr(0,0,1));
 const TK=['Surat Permohonan\nPeminjaman TUK','Surat Balasan\nPeminjaman TUK','Surat Permohonan\nVerifikasi TUK','Berita Acara\nVerifikasi TUK','SK Penetapan\nVerifikasi TUK'];
 const SC=[
 [0,4,u=>{tx('Alur Sertifikasi Kompetensi',640,240,54,'#fff','center',800);tx('Lembaga Sertifikasi Profesi (LSP)',640,305,26,TL);const p=eo(pr(u,.6,3.2));x.strokeStyle=YL;x.lineWidth=6;x.lineCap='round';x.setLineDash([2,14]);x.beginPath();x.moveTo(240,470);x.lineTo(lp(240,940,p),470);x.stroke();x.setLineDash([]);pe(lp(240,940,p),435,BL,'');ce(1060,440,1,.35)}],
@@ -97,7 +119,7 @@ let mk=P(0);if(si>=0&&si<11)mk=lp(P(si),P(si+1),pr(t,stT[si],stT[si+1]));else if
 x.lineCap='round';x.lineWidth=5;x.strokeStyle='#ffffff30';x.beginPath();x.moveTo(P(0),688);x.lineTo(P(11),688);x.stroke();x.strokeStyle=YL;x.beginPath();x.moveTo(P(0),688);x.lineTo(mk,688);x.stroke();
 for(let i=0;i<12;i++){x.beginPath();x.arc(P(i),688,7,0,7);x.fillStyle=t>=stT[i]?YL:'#ffffff40';x.fill();tx(String(i+1),P(i),708,11,'#ffffff90')}
 x.beginPath();x.arc(mk,688,11,0,7);x.fillStyle='#fff';x.fill();x.lineWidth=4;x.strokeStyle=YL;x.stroke();return ci}
-let D=60,pos=0,play=true,last=performance.now(),lastC=-1;const $=id=>document.getElementById(id);
+let D=60,pos=0,play=true,last=performance.now(),lastC=-1,voiceReady=false;const $=id=>document.getElementById(id);
 const OR=SC.map(([a,b])=>b-a),au=$('au');let DUR=[6,12,7,11,7,9,10,11,4],rec=null;
 try{const s=JSON.parse(localStorage.getItem('lsp')||'null');if(s&&s.c&&s.c.length==CP.length)s.c.forEach((v,i)=>CP[i]=v)}catch(e){}
 const SN=['Intro','1-2 Pendaftaran','3 SK & Surat Tugas','4 Verifikasi skema & TUK','5 Pra-asesmen','6-7 Ujian','8-10 Tim teknis','11-12 Sertifikat','Penutup'];
@@ -105,15 +127,20 @@ const S0=()=>{let a=0;return DUR.map(d=>(a+=d)-d)};
 function recalc(){D=DUR.reduce((p,c)=>p+c,0);$('tt').textContent='Total durasi: '+D.toFixed(1)+' detik';const q=S0();document.querySelectorAll('.du').forEach((e,i)=>{if(document.activeElement!==e)e.value=DUR[i].toFixed(1)});document.querySelectorAll('.mu').forEach((e,i)=>e.textContent='mulai '+q[i].toFixed(1)+'s');$('d').value=(Math.abs(D-60)<.05||Math.abs(D-40)<.05)&&DUR.every((d,i)=>Math.abs(d-OR[i]*D/60)<.05)?String(Math.round(D)):''}
 function saveS(){try{localStorage.setItem('lsp',JSON.stringify({d:DUR,c:CP}))}catch(e){}}
 function toV(p){const q=S0();let k=DUR.length-1;for(let i=0;i<DUR.length;i++)if(p<q[i]+DUR[i]){k=i;break}return Math.min(SC[k][0]+(p-q[k])*OR[k]/DUR[k],SC[k][1]-.001)}
+function speakScene(c){if(!window.speechSynthesis||!$('v').checked||au.src)return;speechSynthesis.cancel();const m=new SpeechSynthesisUtterance(CP[c]);m.lang='id-ID';m.rate=Number($('vr').value);speechSynthesis.speak(m)}
+function unlockVoice(){if(voiceReady||!$('v').checked||au.src||!window.speechSynthesis)return;voiceReady=true;const c=render(toV(pos));speakScene(c);lastC=c}
+document.addEventListener('pointerdown',unlockVoice);
+document.addEventListener('keydown',unlockVoice);
 function syncAu(){if(!au.src)return;if(play&&pos<(au.duration||0)){if(au.paused)au.play().catch(()=>{});if(Math.abs(au.currentTime-pos)>.35)au.currentTime=pos}else if(!au.paused)au.pause()}
 function loop(n){const dt=Math.min((n-last)/1000,.1);last=n;if(play){pos+=dt;if(pos>=D&&!rec){pos=D;play=false}}
 const c=render(toV(pos));
-if(play&&c!==lastC&&$('v').checked&&!au.src&&window.speechSynthesis){speechSynthesis.cancel();const m=new SpeechSynthesisUtterance(CP[c]);m.lang='id-ID';m.rate=Number($('vr').value);speechSynthesis.speak(m)}lastC=c;syncAu();
+if(voiceReady&&c!==lastC)speakScene(c);
+lastC=c;syncAu();
 $('s').value=pos/D*1000;$('tm').textContent=`${Math.floor(pos/60)}:${String(Math.floor(pos%60)).padStart(2,'0')} / ${D}s`;$('pp').textContent=play?'Jeda':'Putar';requestAnimationFrame(loop)}
 $('pp').onclick=()=>{if(pos>=D)pos=0;play=!play};$('rs').onclick=()=>{pos=0;play=true;lastC=-1};
 $('s').oninput=e=>{pos=e.target.value/1000*D;lastC=-1};
 $('d').onchange=e=>{if(!e.target.value)return;const r=pos/D;DUR=OR.map(o=>o*e.target.value/60);recalc();saveS();pos=r*D};
-$('v').onchange=e=>{if(!e.target.checked&&window.speechSynthesis)speechSynthesis.cancel();lastC=-1};
+$('v').onchange=e=>{if(!e.target.checked){if(window.speechSynthesis)speechSynthesis.cancel();voiceReady=false;lastC=-1}else unlockVoice()};
 $('vr').oninput=e=>{$('vrv').textContent=Number(e.target.value).toFixed(1)+'×'};
 $('fs').onclick=()=>{try{$('w').requestFullscreen()}catch(e){}};
 const nm=()=>`Tekan "Scene berikutnya" (atau tombol N) saat narasi ini mulai: ${SN[rec.length]} - "${CP[rec.length]}"`;
@@ -121,7 +148,7 @@ function nextMark(){if(!rec)return;rec.push(pos);if(rec.length>=SC.length){const
 $('rc').onclick=()=>{if(!au.src){$('rm').textContent='Muat file audio dulu.';return}rec=[0];pos=0;play=true;au.currentTime=0;lastC=-1;$('nx').hidden=false;$('rm').textContent=nm()};
 $('nx').onclick=nextMark;addEventListener('keydown',e=>{if(rec&&(e.key=='n'||e.key=='N'))nextMark()});
 au.onended=()=>{if(rec){rec=null;$('nx').hidden=true;$('rm').textContent='Perekaman dibatalkan: audio selesai sebelum semua scene ditandai.'}};
-$('af').onchange=e=>{const f=e.target.files[0];if(!f)return;if(window.speechSynthesis)speechSynthesis.cancel();au.src=URL.createObjectURL(f);au.onloadedmetadata=()=>{$('rm').textContent='Audio dimuat ('+au.duration.toFixed(1)+' detik). Suara bawaan dimatikan. Atur durasi tiap scene di tabel, atau klik Rekam penanda scene.';pos=0;play=true;lastC=-1;au.play().catch(()=>{})}};
+$('af').onchange=e=>{const f=e.target.files[0];if(!f)return;if(window.speechSynthesis)speechSynthesis.cancel();voiceReady=false;au.src=URL.createObjectURL(f);au.onloadedmetadata=()=>{$('rm').textContent='Audio dimuat ('+au.duration.toFixed(1)+' detik). Suara bawaan dimatikan. Atur durasi tiap scene di tabel, atau klik Rekam penanda scene.';pos=0;play=true;lastC=-1;au.play().catch(()=>{})}};
 $('fit').onclick=()=>{if(au.duration){const f=au.duration/D;DUR=DUR.map(d=>d*f);recalc();saveS()}};
 SC.forEach((s,i)=>{const r=$('tb').insertRow();r.innerHTML='<td><button class="jp">'+SN[i]+'</button></td><td><input class="du" type="number" min="1" step="0.1"> detik<br><small class="mu"></small></td><td><input class="ct" type="text"></td>';r.querySelector('.jp').onclick=()=>{pos=S0()[i];lastC=-1};r.querySelector('.du').oninput=e=>{const v=parseFloat(e.target.value);if(v>=1){DUR[i]=v;recalc();saveS()}};const ct=r.querySelector('.ct');ct.value=CP[i];ct.oninput=()=>{CP[i]=ct.value;saveS()}});recalc();
 requestAnimationFrame(loop);
